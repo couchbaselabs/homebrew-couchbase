@@ -3,8 +3,8 @@
 class CouchbaseCxxClient < Formula
   desc "Couchbase C++ Client"
   homepage "https://github.com/couchbase/couchbase-cxx-client"
-  url "https://packages.couchbase.com/clients/cxx/couchbase-cxx-client-1.0.4.tar.gz"
-  sha256 "b9967b9db5f562af203788f48413ad5fba9a40b16a74e1a4d75bf8f6ba63353e"
+  url "https://packages.couchbase.com/clients/cxx/couchbase-cxx-client-1.0.5.tar.gz"
+  sha256 "c0525d782dd9658bbe6e3625b0dc9ed5bbbecac8b2cf5cdae8486d9696620b08"
   license "Apache-2.0"
   head "https://github.com/couchbase/couchbase-cxx-client.git", branch: "main"
 
