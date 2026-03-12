@@ -3,8 +3,8 @@
 class CouchbaseCxxClient < Formula
   desc "Couchbase C++ Client"
   homepage "https://github.com/couchbase/couchbase-cxx-client"
-  url "https://packages.couchbase.com/clients/cxx/couchbase-cxx-client-1.2.0.tar.gz"
-  sha256 "350935e90b776d1263ea92dc12a8657e9158f2a1706ca6055a132bacb7dae881"
+  url "https://packages.couchbase.com/clients/cxx/couchbase-cxx-client-1.3.0.tar.gz"
+  sha256 "b8cef1705437f8462f308fc575c01765b8c91201e8df7c12ae8d56905a1d256f"
   license "Apache-2.0"
   head "https://github.com/couchbase/couchbase-cxx-client.git", branch: "main"
 
@@ -14,6 +14,10 @@ class CouchbaseCxxClient < Formula
   depends_on "coreutils" => :build # gcp
   depends_on "gnu-tar" => :build # gtar
   depends_on "gnu-sed" => :build # gsed
+
+  depends_on "protobuf" => :build
+  depends_on "curl" => :build
+  depends_on "nlohmann-json" => :build
 
   conflicts_with "cbc", "libcouchbase", because: "both install `cbc` binaries"
 
@@ -25,10 +29,10 @@ class CouchbaseCxxClient < Formula
            "-DCOUCHBASE_CXX_CLIENT_STATIC_BORINGSSL=ON",
            "-DCOUCHBASE_CXX_CLIENT_BUILD_EXAMPLES=OFF",
            "-DCOUCHBASE_CXX_CLIENT_BUILD_TESTS=OFF",
+           "-DCOUCHBASE_CXX_CLIENT_BUILD_OPENTELEMETRY=ON",
            "-DCOUCHBASE_CXX_CLIENT_BUILD_TOOLS=ON",
            "-DCOUCHBASE_CXX_CLIENT_BUILD_STATIC=ON",
            "-DCOUCHBASE_CXX_CLIENT_BUILD_SHARED=ON",
-           "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
            *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
