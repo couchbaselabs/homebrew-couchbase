@@ -9,11 +9,11 @@ class CouchbaseCxxClient < Formula
   head "https://github.com/couchbase/couchbase-cxx-client.git", branch: "main"
 
   depends_on "cmake" => :build
-  depends_on "ninja" => :build
-  depends_on "findutils" => :build # gxattr
   depends_on "coreutils" => :build # gcp
-  depends_on "gnu-tar" => :build # gtar
+  depends_on "findutils" => :build # gxattr
   depends_on "gnu-sed" => :build # gsed
+  depends_on "gnu-tar" => :build # gtar
+  depends_on "ninja" => :build
 
   conflicts_with "cbc", "libcouchbase", because: "both install `cbc` binaries"
 

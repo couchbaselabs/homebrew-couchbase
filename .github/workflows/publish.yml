@@ -1,0 +1,84 @@
+name: Publish Bottles
+
+on:
+  pull_request_target:
+    types:
+      - labeled
+  workflow_run:
+    workflows: ["Brew Test & Build Bottles"]
+    types:
+      - completed
+    branches:
+      - master
+      - main
+  workflow_dispatch:
+
+jobs:
+  publish:
+    if: >-
+      (github.event_name == 'pull_request_target' && github.event.label.name == 'pr-pull') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'workflow_dispatch')
+    runs-on: macos-14
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Install Homebrew Bundler RubyGems
+        run: brew install-bundler-gems
+
+      - name: Download bottle artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: bottles_*
+          merge-multiple: true
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Publish bottles and update formula
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request_target" ]; then
+            brew pr-pull --debug --workflows=tests.yml ${{ github.event.pull_request.number }}
+          else
+            brew test-bot --publish --testing-formulae=couchbase-cxx-client --root-url=https://ghcr.io/v2/couchbaselabs/couchbase
+          fi
+
+      - name: Push updated formula to master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "$(git status --porcelain Formula/)" ]; then
+            git add Formula/
+            git -c user.name="${{ github.actor }}" \
+                -c user.email="${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com" \
+                commit -m "couchbase-cxx-client: update bottle block"
+            git pull --rebase origin master
+            git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $(echo -n "x-access-token:${GITHUB_TOKEN}" | base64)" \
+                push origin master
+          fi
+
+      - name: Add Publish Summary
+        if: always()
+        run: |
+          FORMULA=$(basename Formula/*.rb .rb)
+          VERSION=$(grep -E '^\s*url\s' "Formula/${FORMULA}.rb" | sed -E 's/.*-([0-9]+\.[0-9]+\.[0-9]+)\.tar.*/\1/')
+          cat << EOF >> "$GITHUB_STEP_SUMMARY"
+          ### 🚀 Homebrew Bottle Publishing Summary
+
+          * **Formula**: \`${FORMULA}\` (Version ${VERSION})
+          * **GitHub Package Container Page**: https://github.com/orgs/couchbaselabs/packages/container/package/couchbase%2F${FORMULA}
+          * **Exact OCI Image Reference**: \`ghcr.io/couchbaselabs/couchbase/${FORMULA}:${VERSION}\`
+          * **OCI Manifest Endpoint**: \`https://ghcr.io/v2/couchbaselabs/couchbase/${FORMULA}/manifests/${VERSION}\`
+          EOF
