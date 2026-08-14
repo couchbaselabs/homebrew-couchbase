@@ -3,8 +3,8 @@
 class CouchbaseCxxClient < Formula
   desc "Couchbase C++ Client"
   homepage "https://github.com/couchbase/couchbase-cxx-client"
-  url "https://packages.couchbase.com/clients/cxx/couchbase-cxx-client-1.3.2.tar.gz"
-  sha256 "b2c82548c48dcf2481ec0bac4ad9c24a93324e5e74e31ddd566731527cce4187"
+  url "https://packages.couchbase.com/clients/cxx/couchbase-cxx-client-1.4.0.tar.gz"
+  sha256 "dec07ee09de2446ef2a95eb22bf5da3f9299aa72662d9eed3f473d276b546538"
   license "Apache-2.0"
   head "https://github.com/couchbase/couchbase-cxx-client.git", branch: "main"
 
@@ -14,10 +14,6 @@ class CouchbaseCxxClient < Formula
   depends_on "coreutils" => :build # gcp
   depends_on "gnu-tar" => :build # gtar
   depends_on "gnu-sed" => :build # gsed
-
-  depends_on "protobuf" => :build
-  depends_on "curl" => :build
-  depends_on "nlohmann-json" => :build
 
   conflicts_with "cbc", "libcouchbase", because: "both install `cbc` binaries"
 
@@ -33,6 +29,8 @@ class CouchbaseCxxClient < Formula
            "-DCOUCHBASE_CXX_CLIENT_BUILD_TOOLS=ON",
            "-DCOUCHBASE_CXX_CLIENT_BUILD_STATIC=ON",
            "-DCOUCHBASE_CXX_CLIENT_BUILD_SHARED=ON",
+           "-DCOUCHBASE_CXX_CLIENT_BUILD_FIT_PERFORMER=OFF",
+           "-DCOUCHBASE_CXX_CLIENT_BUILD_COUCHBASE2=ON",
            *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
