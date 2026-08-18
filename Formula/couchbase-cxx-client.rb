@@ -8,6 +8,13 @@ class CouchbaseCxxClient < Formula
   license "Apache-2.0"
   head "https://github.com/couchbase/couchbase-cxx-client.git", branch: "main"
 
+  bottle do
+    root_url "https://ghcr.io/v2/couchbaselabs/couchbase"
+    rebuild 6
+    sha256 cellar: :any, arm64_sequoia: "1d59f8b1f09fe37d2b7014acadb18b876cf1b3cecb0ff8fe55427867bb319ab8"
+    sha256 cellar: :any, arm64_sonoma:  "86b2bf67c12781493ddc028cac01c5178cc4b169e0bcd6cf888c3645f5c8df01"
+  end
+
   depends_on "cmake" => :build
   depends_on "coreutils" => :build # gcp
   depends_on "findutils" => :build # gxattr
@@ -29,11 +36,12 @@ class CouchbaseCxxClient < Formula
            "-DCOUCHBASE_CXX_CLIENT_BUILD_TOOLS=ON",
            "-DCOUCHBASE_CXX_CLIENT_BUILD_STATIC=ON",
            "-DCOUCHBASE_CXX_CLIENT_BUILD_SHARED=ON",
-           "-DCOUCHBASE_CXX_CLIENT_BUILD_FIT_PERFORMER=OFF",
+           "-DCOUCHBASE_CXX_CLIENT_BUILD_FIT_PERFORMER=ON",
            "-DCOUCHBASE_CXX_CLIENT_BUILD_COUCHBASE2=ON",
            *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
+    mv bin/"fit_performer", bin/"couchbase-cxx_fit_performer" if (bin/"fit_performer").exist?
   end
 
   test do
