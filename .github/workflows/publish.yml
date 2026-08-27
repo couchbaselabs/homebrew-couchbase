@@ -33,7 +33,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+        uses: Homebrew/actions/setup-homebrew@main
 
       - name: Install Homebrew Bundler RubyGems
         run: brew install-bundler-gems
@@ -43,16 +43,18 @@ jobs:
         with:
           pattern: bottles_*
           merge-multiple: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
 
       - name: Publish bottles and update formula
         env:
-          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_GITHUB_PACKAGES_USER: ${{ github.actor }}
+          HOMEBREW_GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ github.event_name }}" = "pull_request_target" ]; then
             brew pr-pull --debug --workflows=tests.yml ${{ github.event.pull_request.number }}
           else
-            brew test-bot --publish --testing-formulae=couchbase-cxx-client --root-url=https://ghcr.io/v2/couchbaselabs/couchbase
+            brew pr-upload --verbose --warn-on-upload-failure --root-url=https://ghcr.io/v2/couchbaselabs/couchbase
           fi
 
       - name: Push updated formula to master
@@ -64,6 +66,8 @@ jobs:
             git -c user.name="${{ github.actor }}" \
                 -c user.email="${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com" \
                 commit -m "couchbase-cxx-client: update bottle block"
+          fi
+          if [ -n "$(git log origin/master..HEAD)" ]; then
             git pull --rebase origin master
             git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $(echo -n "x-access-token:${GITHUB_TOKEN}" | base64)" \
                 push origin master
