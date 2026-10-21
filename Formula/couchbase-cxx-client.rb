@@ -8,8 +8,10 @@ class CouchbaseCxxClient < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/couchbaselabs/couchbase"
-    rebuild 9
-    sha256 cellar: :any, arm64_sequoia: "0d616b24170acff8d5585f2ba02e487bbf2d55b6c6097adc1923ab474b9f6a52"
+    rebuild 10
+    sha256 cellar: :any, arm64_golden_gate: "11230d82e289ab7ca1e850d3e1988b017d6b852812c3a48ee4bcdd6d6c754acc"
+    sha256 cellar: :any, arm64_tahoe:       "ac31736e9ba93261f9666664f3847c6b0865f3a594bde8212683f9b6c51ba9d9"
+    sha256 cellar: :any, arm64_sequoia:     "6f6594c524f9bcdde4affb2af53ec93eb042376fdaa0d53ef5de1a09a1360c33"
   end
 
   depends_on "cmake" => :build
