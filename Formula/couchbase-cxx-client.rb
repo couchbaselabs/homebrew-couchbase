@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class CouchbaseCxxClient < Formula
   desc "Couchbase C++ Client"
   homepage "https://github.com/couchbase/couchbase-cxx-client"
@@ -24,26 +22,27 @@ class CouchbaseCxxClient < Formula
   conflicts_with "cbc", "libcouchbase", because: "both install `cbc` binaries"
 
   def install
-    system "cmake", "-S", ".", "-B", "build",
-           "-G", "Ninja",
-           "-DHOMEBREW_ALLOW_FETCHCONTENT=ON",
-           "-DCOUCHBASE_CXX_CLIENT_INSTALL=ON",
-           "-DCOUCHBASE_CXX_CLIENT_STATIC_BORINGSSL=ON",
-           "-DCOUCHBASE_CXX_CLIENT_BUILD_EXAMPLES=OFF",
-           "-DCOUCHBASE_CXX_CLIENT_BUILD_TESTS=OFF",
-           "-DCOUCHBASE_CXX_CLIENT_BUILD_OPENTELEMETRY=ON",
-           "-DCOUCHBASE_CXX_CLIENT_BUILD_TOOLS=ON",
-           "-DCOUCHBASE_CXX_CLIENT_BUILD_STATIC=ON",
-           "-DCOUCHBASE_CXX_CLIENT_BUILD_SHARED=ON",
-           "-DCOUCHBASE_CXX_CLIENT_BUILD_FIT_PERFORMER=ON",
-           "-DCOUCHBASE_CXX_CLIENT_BUILD_COUCHBASE2=ON",
-           *std_cmake_args
+    args = %w[
+      -DHOMEBREW_ALLOW_FETCHCONTENT=ON
+      -DCOUCHBASE_CXX_CLIENT_INSTALL=ON
+      -DCOUCHBASE_CXX_CLIENT_STATIC_BORINGSSL=ON
+      -DCOUCHBASE_CXX_CLIENT_BUILD_EXAMPLES=OFF
+      -DCOUCHBASE_CXX_CLIENT_BUILD_TESTS=OFF
+      -DCOUCHBASE_CXX_CLIENT_BUILD_OPENTELEMETRY=ON
+      -DCOUCHBASE_CXX_CLIENT_BUILD_TOOLS=ON
+      -DCOUCHBASE_CXX_CLIENT_BUILD_STATIC=ON
+      -DCOUCHBASE_CXX_CLIENT_BUILD_SHARED=ON
+      -DCOUCHBASE_CXX_CLIENT_BUILD_FIT_PERFORMER=ON
+      -DCOUCHBASE_CXX_CLIENT_BUILD_COUCHBASE2=ON
+    ]
+
+    system "cmake", "-S", ".", "-B", "build", "-G", "Ninja", *args, *std_cmake_args
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
     mv bin/"fit_performer", bin/"couchbase-cxx_fit_performer" if (bin/"fit_performer").exist?
   end
 
   test do
-    system "#{bin}/cbc", "--version"
+    system bin/"cbc", "--version"
   end
 end

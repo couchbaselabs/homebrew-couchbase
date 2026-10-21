@@ -19,7 +19,7 @@ jobs:
       (github.event_name == 'pull_request_target' && github.event.label.name == 'pr-pull') ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
       (github.event_name == 'workflow_dispatch')
-    runs-on: macos-14
+    runs-on: macos-15
     permissions:
       contents: write
       packages: write
@@ -61,28 +61,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -n "$(git status --porcelain Formula/)" ]; then
-            git add Formula/
-            git -c user.name="${{ github.actor }}" \
-                -c user.email="${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com" \
-                commit -m "couchbase-cxx-client: update bottle block"
-          fi
           if [ -n "$(git log origin/master..HEAD)" ]; then
             git pull --rebase origin master
             git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $(echo -n "x-access-token:${GITHUB_TOKEN}" | base64)" \
                 push origin master
           fi
-
-      - name: Add Publish Summary
-        if: always()
-        run: |
-          FORMULA=$(basename Formula/*.rb .rb)
-          VERSION=$(grep -E '^\s*url\s' "Formula/${FORMULA}.rb" | sed -E 's/.*-([0-9]+\.[0-9]+\.[0-9]+)\.tar.*/\1/')
-          cat << EOF >> "$GITHUB_STEP_SUMMARY"
-          ### 🚀 Homebrew Bottle Publishing Summary
-
-          * **Formula**: \`${FORMULA}\` (Version ${VERSION})
-          * **GitHub Package Container Page**: https://github.com/orgs/couchbaselabs/packages/container/package/couchbase%2F${FORMULA}
-          * **Exact OCI Image Reference**: \`ghcr.io/couchbaselabs/couchbase/${FORMULA}:${VERSION}\`
-          * **OCI Manifest Endpoint**: \`https://ghcr.io/v2/couchbaselabs/couchbase/${FORMULA}/manifests/${VERSION}\`
-          EOF
